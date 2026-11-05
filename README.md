@@ -1,6 +1,6 @@
-# Cracked Client — macOS companion and free-trial launcher
+# Cooled AI — macOS generation and research app
 
-A native SwiftUI launcher shell for the official Minecraft free trials, plus saved HUD preferences and local practice notes.
+A native SwiftUI AI app for prompt-based writing, brainstorming, explanations, planning, and code generation. Optional Research mode uses the OpenAI Responses API web-search tool and displays source links.
 
 **Made by c0oled!**
 
@@ -12,50 +12,36 @@ Run this in Terminal:
 curl -fL --progress-bar https://raw.githubusercontent.com/ttmeticks-source/Cracked-Client/main/install.sh | bash
 ```
 
-The installer downloads the latest app ZIP, extracts it, installs `CrackedClient.app` into `~/Applications`, and opens it. It does not put the app on your Desktop and does not require Xcode.
+The installer downloads the latest release, automatically extracts it, installs `CooledAI.app` into `~/Applications`, and opens it. It does not put the app on your Desktop and does not require Xcode.
 
-## Free game launch options
+## First setup
 
-### Java Edition — official free demo
+1. Open Cooled AI and press the gear button.
+2. Enter an OpenAI API key managed by a parent or guardian.
+3. Keep the default model name unless the connected API project uses a different supported model.
+4. Save the key. Cooled AI stores it in macOS Keychain.
 
-1. Select **Java Edition** in the app.
-2. The app opens the official Minecraft Launcher. If it is missing, the official Minecraft download page opens.
-3. Sign in with a Microsoft account that does not own Java Edition.
-4. Select **Play Demo** in the launcher.
+Never paste the key into a prompt, screenshot, or message. The app sends prompts to the OpenAI API over HTTPS. The key stays in Keychain and is not written into the repository or app bundle.
 
-The official demo is limited to about 100 minutes of in-game time (five in-game days), and demo accounts cannot join multiplayer servers. See the [official Java demo instructions](https://help.minecraft.net/hc/en-us/articles/4408948974989-Minecraft-Java-Edition-Demo-Mode-).
+## Generate
 
-### Bedrock Edition — official Android free trial through an emulator
+Write a prompt in the box and press **Generate**. Cooled AI keeps a short recent conversation context and supports writing, ideas, explanations, planning, and code.
 
-Bedrock has no official native macOS release. The app can start an Android virtual device and open Mojang's official **Minecraft Trial** listing in Google Play.
+## Research
 
-One-time setup:
-1. Install [Android Studio](https://developer.android.com/studio).
-2. Open **Device Manager** and create a phone virtual device.
-3. Choose a system image labelled **Google Play** (not only Google APIs).
-4. Finish setup and close the emulator.
+Switch **Research** on to require the Responses API web-search tool for that turn. The response shows clickable source links from URL-citation annotations and the returned web-search sources.
 
-After setup:
-1. Select **Bedrock Edition** in this app.
-2. The app detects the Android SDK and starts the Google Play virtual device.
-3. Sign in to Google Play inside the emulator, install **Minecraft Trial** by Mojang, and open it there.
+OpenAI's current documentation recommends the Responses API `web_search` tool for new integrations. See the [web-search guide](https://developers.openai.com/api/docs/guides/tools-web-search) and [Responses API documentation](https://developers.openai.com/api/docs/guides/responses).
 
-This is the official free Android trial running inside an emulator, not a native macOS Bedrock build. It is time-limited and may be slower than a physical Android device. The Google Play listing is [Minecraft Trial by Mojang](https://play.google.com/store/apps/details?id=com.mojang.minecrafttrialpe). Android Emulator is a tool supplied with Android Studio; see [Android's emulator guide](https://developer.android.com/studio/run/emulator).
+## Costs and account setup
 
-## App features
-
-- Java demo and Bedrock Android-trial launch buttons
-- Home, HUD, Practice, and Settings tabs
-- Saved local preferences and practice notes
-- App installs to `~/Applications`; Android SDK and virtual-device data stay in the user's Library folders
-
-This app does not unlock paid editions, bypass account checks, modify Minecraft files, or inject into game processes. The HUD options are companion-app preferences, not a live in-game overlay.
+This app is not a free AI service and does not include an API key. API usage is billed separately from a ChatGPT subscription. Model input/output and web-search calls may cost money. Use an API project managed by a parent or guardian, and set a spending limit before use. Check [current API pricing](https://openai.com/api/pricing/).
 
 ## Requirements
 
 - macOS 13 or later
-- For Java: official Minecraft Launcher and a Microsoft account
-- For Bedrock trial: Android Studio, Android SDK Emulator, Platform-Tools, and a Google Play-enabled virtual device
+- Internet connection
+- An OpenAI API key with access to the selected model and Responses API
 
 ## Build locally
 
@@ -66,6 +52,6 @@ swift run
 
 ## Manual download
 
-Open the [latest GitHub Release](https://github.com/ttmeticks-source/Cracked-Client/releases/latest) and download `CrackedClient-macOS.zip`.
+Open the [latest GitHub Release](https://github.com/ttmeticks-source/Cracked-Client/releases/latest) and download `CooledAI-macOS.zip`.
 
 The app is not code-signed or notarized. macOS may show a first-launch security warning.
