@@ -14,16 +14,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build release binary
-        run: swift build -c release
+      - name: Build Intel and Apple Silicon binaries
+        run: |
+          swift build -c release --triple x86_64-apple-macosx13.0 --build-path .build-x86_64
+          swift build -c release --triple arm64-apple-macosx13.0 --build-path .build-arm64
 
-      - name: Assemble app bundle and ZIP
+      - name: Assemble and validate universal app bundle
         shell: bash
         run: |
+          set -euo pipefail
           APP="CrackedClient.app"
           mkdir -p "$APP/Contents/MacOS"
-          cp .build/release/CrackedClient "$APP/Contents/MacOS/CrackedClient"
+          lipo -create \
+            .build-x86_64/x86_64-apple-macosx/release/CrackedClient \
+            .build-arm64/arm64-apple-macosx/release/CrackedClient \
+            -output "$APP/Contents/MacOS/CrackedClient"
           chmod +x "$APP/Contents/MacOS/CrackedClient"
+          lipo -verify_arch x86_64 arm64 "$APP/Contents/MacOS/CrackedClient"
+          file "$APP/Contents/MacOS/CrackedClient"
           cat > "$APP/Contents/Info.plist" <<'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -31,13 +39,18 @@ jobs:
           <key>CFBundleName</key><string>CrackedClient</string>
           <key>CFBundleDisplayName</key><string>Cracked Client</string>
           <key>CFBundleIdentifier</key><string>com.c0oled.crackedclient</string>
-          <key>CFBundleVersion</key><string>1.0</string>
-          <key>CFBundleShortVersionString</key><string>1.0</string>
+          <key>CFBundleVersion</key><string>1.1</string>
+          <key>CFBundleShortVersionString</key><string>1.1</string>
           <key>CFBundlePackageType</key><string>APPL</string>
           <key>CFBundleExecutable</key><string>CrackedClient</string>
+          <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
           <key>LSMinimumSystemVersion</key><string>13.0</string>
+          <key>NSPrincipalClass</key><string>NSApplication</string>
+          <key>NSHighResolutionCapable</key><true/>
+          <key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
           </dict></plist>
           PLIST
+          /usr/libexec/PlistBuddy -c "Print" "$APP/Contents/Info.plist" >/dev/null
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP" CrackedClient-macOS.zip
 
       - uses: actions/upload-artifact@v4
