@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 @main
 struct CrackedClientApp: App {
@@ -20,6 +21,8 @@ struct ClientView: View {
 
     @State private var selectedTab = "Home"
     @State private var hasChosenEdition = false
+    @State private var launchAlert = false
+    @State private var launchMessage = ""
 
     private let tabs = ["Home", "HUD", "Practice", "Settings"]
 
@@ -140,6 +143,11 @@ struct ClientView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .alert("Minecraft Launcher", isPresented: $launchAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(launchMessage)
+        }
     }
 
     private var versionChooser: some View {
@@ -177,6 +185,7 @@ struct ClientView: View {
         Button {
             edition = title
             hasChosenEdition = true
+            launchSelectedEdition()
         } label: {
             VStack(spacing: 14) {
                 Image(systemName: symbol)
@@ -194,6 +203,41 @@ struct ClientView: View {
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.cyan.opacity(0.55), lineWidth: 1))
         }
         .buttonStyle(.plain)
+    }
+
+    private func launchSelectedEdition() {
+        guard edition == "Java Edition" else {
+            launchMessage = "Minecraft Bedrock Edition does not have an official macOS release, so this app cannot launch it on this Mac. Choose Java Edition to launch the native Mac version."
+            launchAlert = true
+            return
+        }
+
+        let fileManager = FileManager.default
+        let candidates = [
+            URL(fileURLWithPath: "/Applications/Minecraft.app"),
+            fileManager.homeDirectoryForCurrentUser.appendingPathComponent("Applications/Minecraft.app"),
+            URL(fileURLWithPath: "/Applications/Minecraft Launcher.app"),
+            fileManager.homeDirectoryForCurrentUser.appendingPathComponent("Applications/Minecraft Launcher.app")
+        ]
+
+        let installedApp = candidates.first { fileManager.fileExists(atPath: $0.path) }
+            ?? NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.mojang.minecraftlauncher")
+
+        guard let appURL = installedApp else {
+            launchMessage = "Minecraft Java Edition was not found. Install the official Minecraft Launcher for macOS, then choose Java Edition again."
+            launchAlert = true
+            return
+        }
+
+        let configuration = NSWorkspace.OpenConfiguration()
+        NSWorkspace.shared.openApplication(at: appURL, configuration: configuration) { _, error in
+            DispatchQueue.main.async {
+                if let error {
+                    launchMessage = "Minecraft could not be opened: \\(error.localizedDescription)"
+                    launchAlert = true
+                }
+            }
+        }
     }
 
     private func icon(for tab: String) -> String {
