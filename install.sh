@@ -40,7 +40,7 @@ if ! curl -fL --progress-bar --retry 3 --retry-delay 2 "$ASSET_URL" -o "$WORK_DI
 fi
 
 printf "\n${YELLOW}[2/3]${RESET} Extracting the app automatically...\n"
-ditto -x -k "$WORK_DIR/CrackedClient-macOS.zip" "$WORK_DIR"
+ditto -x -k "$WORK_DIR/CooledAI-macOS.zip" "$WORK_DIR"
 APP_SOURCE="$WORK_DIR/CooledAI.app"
 if [[ ! -d "$APP_SOURCE" ]]; then
   printf "${RED}✖ The ZIP did not contain CooledAI.app.\n${RESET}"
