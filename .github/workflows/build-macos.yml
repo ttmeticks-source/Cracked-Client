@@ -1,0 +1,50 @@
+name: Build Cracked Client for macOS
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build release binary
+        run: swift build -c release
+
+      - name: Assemble app bundle and ZIP
+        shell: bash
+        run: |
+          APP="CrackedClient.app"
+          mkdir -p "$APP/Contents/MacOS"
+          cp .build/release/CrackedClient "$APP/Contents/MacOS/CrackedClient"
+          chmod +x "$APP/Contents/MacOS/CrackedClient"
+          cat > "$APP/Contents/Info.plist" <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+          <key>CFBundleName</key><string>CrackedClient</string>
+          <key>CFBundleDisplayName</key><string>Cracked Client</string>
+          <key>CFBundleIdentifier</key><string>com.c0oled.crackedclient</string>
+          <key>CFBundleVersion</key><string>1.0</string>
+          <key>CFBundleShortVersionString</key><string>1.0</string>
+          <key>CFBundlePackageType</key><string>APPL</string>
+          <key>CFBundleExecutable</key><string>CrackedClient</string>
+          <key>LSMinimumSystemVersion</key><string>13.0</string>
+          </dict></plist>
+          PLIST
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP" CrackedClient-macOS.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CrackedClient-macOS
+          path: CrackedClient-macOS.zip
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: CrackedClient-macOS.zip
