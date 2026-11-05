@@ -19,11 +19,14 @@ struct ClientView: View {
     @AppStorage("practiceNotes") private var practiceNotes = ""
 
     @State private var selectedTab = "Home"
+    @State private var hasChosenEdition = false
 
     private let tabs = ["Home", "HUD", "Practice", "Settings"]
 
     var body: some View {
-        HStack(spacing: 0) {
+        Group {
+            if hasChosenEdition {
+                HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 12) {
                 Text("COOLED")
                     .font(.system(size: 25, weight: .black, design: .rounded))
@@ -131,7 +134,66 @@ struct ClientView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(red: 0.10, green: 0.11, blue: 0.16))
         }
+                .preferredColorScheme(.dark)
+            } else {
+                versionChooser
+            }
+        }
         .preferredColorScheme(.dark)
+    }
+
+    private var versionChooser: some View {
+        VStack(spacing: 28) {
+            Spacer()
+            Text("COOLED")
+                .font(.system(size: 34, weight: .black, design: .rounded))
+                .foregroundStyle(.cyan)
+            Text("CHOOSE YOUR EDITION")
+                .font(.system(size: 25, weight: .bold))
+                .foregroundStyle(.white)
+            Text("Select which Minecraft version to use.")
+                .foregroundStyle(.gray)
+
+            HStack(spacing: 18) {
+                editionCard(title: "Java Edition", subtitle: "PC • Java", symbol: "laptopcomputer")
+                editionCard(title: "Bedrock Edition", subtitle: "Cross-platform", symbol: "cube.transparent")
+            }
+            .frame(maxWidth: 620)
+
+            Text("You can change your choice next time you launch the app.")
+                .font(.caption)
+                .foregroundStyle(.gray)
+            Spacer()
+            Text("Made by c0oled!")
+                .font(.caption)
+                .foregroundStyle(.gray)
+        }
+        .padding(36)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(red: 0.10, green: 0.11, blue: 0.16))
+    }
+
+    private func editionCard(title: String, subtitle: String, symbol: String) -> some View {
+        Button {
+            edition = title
+            hasChosenEdition = true
+        } label: {
+            VStack(spacing: 14) {
+                Image(systemName: symbol)
+                    .font(.system(size: 38))
+                    .foregroundStyle(.cyan)
+                Text(title)
+                    .font(.title3.bold())
+                    .foregroundStyle(.white)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+            }
+            .frame(maxWidth: .infinity, minHeight: 170)
+            .background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.cyan.opacity(0.55), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
     }
 
     private func icon(for tab: String) -> String {
