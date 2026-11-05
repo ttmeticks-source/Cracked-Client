@@ -304,25 +304,25 @@ struct ClientView: View {
         DispatchQueue.global(qos: .utility).async {
             let deadline = Date().addingTimeInterval(240)
             while Date() < deadline {
-                if commandOutput(adbURL, arguments: ["-e", "shell", "getprop", "sys.boot_completed"]) == "1" {
-                    let playStoreExists = commandOutput(adbURL, arguments: ["-e", "shell", "pm", "path", "com.android.vending"]) != nil
+                if self.commandOutput(adbURL, arguments: ["-e", "shell", "getprop", "sys.boot_completed"]) == "1" {
+                    let playStoreExists = self.commandOutput(adbURL, arguments: ["-e", "shell", "pm", "path", "com.android.vending"]) != nil
                     guard playStoreExists else {
                         DispatchQueue.main.async {
-                            launchMessage = "The Android emulator started, but its Google Play Store is missing. Shut it down and create a virtual device using a Google Play system image."
-                            launchAlert = true
+                            self.launchMessage = "The Android emulator started, but its Google Play Store is missing. Shut it down and create a virtual device using a Google Play system image."
+                            self.launchAlert = true
                         }
                         return
                     }
 
-                    _ = commandOutput(adbURL, arguments: [
+                    _ = self.commandOutput(adbURL, arguments: [
                         "-e", "shell", "am", "start",
                         "-a", "android.intent.action.VIEW",
                         "-d", "market://details?id=com.mojang.minecrafttrialpe"
                     ])
 
                     DispatchQueue.main.async {
-                        launchMessage = "The Android emulator is ready and the official Minecraft Trial listing has been opened in Google Play. Sign in to Google Play, install Minecraft Trial by Mojang, then launch it inside the emulator. This is the free, time-limited Android Bedrock trial—not a native Mac build."
-                        launchAlert = true
+                        self.launchMessage = "The Android emulator is ready and the official Minecraft Trial listing has been opened in Google Play. Sign in to Google Play, install Minecraft Trial by Mojang, then launch it inside the emulator. This is the free, time-limited Android Bedrock trial—not a native Mac build."
+                        self.launchAlert = true
                     }
                     return
                 }
@@ -330,8 +330,8 @@ struct ClientView: View {
             }
 
             DispatchQueue.main.async {
-                launchMessage = "Android Emulator did not finish starting within four minutes. Open Android Studio → Device Manager, start the Google Play virtual device manually, then try again."
-                launchAlert = true
+                self.launchMessage = "Android Emulator did not finish starting within four minutes. Open Android Studio → Device Manager, start the Google Play virtual device manually, then try again."
+                self.launchAlert = true
             }
         }
     }
