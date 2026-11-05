@@ -9,7 +9,7 @@ A native SwiftUI companion interface with Java/Bedrock profiles, saved HUD prefe
 After the first successful GitHub Actions build, run this in macOS Terminal:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/ttmeticks-source/Cracked-Client/main/install.sh | bash
+curl -fL --progress-bar https://raw.githubusercontent.com/ttmeticks-source/Cracked-Client/main/install.sh | bash
 ```
 
 The installer downloads the latest published app ZIP, automatically extracts it, installs `CrackedClient.app` into `~/Applications`, and opens it. It does not require Xcode.
