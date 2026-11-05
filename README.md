@@ -1,6 +1,6 @@
-# Cooled AI — macOS generation and research app
+# KAEL — macOS AI generation and research app
 
-A native SwiftUI AI app for prompt-based writing, brainstorming, explanations, planning, and code generation. Optional Research mode uses the OpenAI Responses API web-search tool and displays source links.
+A native SwiftUI AI workbench with a direct, build-focused KAEL voice. Generate writing, brainstorm ideas, explain topics, plan projects, and write code. Research mode uses the OpenAI Responses API web-search tool and displays source links.
 
 **Made by c0oled!**
 
@@ -12,30 +12,30 @@ Run this in Terminal:
 curl -fL --progress-bar https://raw.githubusercontent.com/ttmeticks-source/Cracked-Client/main/install.sh | bash
 ```
 
-The installer downloads the latest release, automatically extracts it, installs `CooledAI.app` into `~/Applications`, and opens it. It does not put the app on your Desktop and does not require Xcode.
+The installer downloads the latest release, extracts it, installs `KAEL.app` into `~/Applications`, and opens it. It does not put the app on your Desktop and does not require Xcode.
 
 ## First setup
 
-1. Open Cooled AI and press the gear button.
-2. Enter an OpenAI API key managed by a parent or guardian.
-3. Keep the default model name unless the connected API project uses a different supported model.
-4. Save the key. Cooled AI stores it in macOS Keychain.
+1. Open KAEL and press the gear button.
+2. Add an OpenAI API key managed by a parent or guardian.
+3. The default API model is `gpt-6-astra`. Change it only to a model enabled for the API project.
+4. Save the key. KAEL stores it in macOS Keychain.
 
-Never paste the key into a prompt, screenshot, or message. The app sends prompts to the OpenAI API over HTTPS. The key stays in Keychain and is not written into the repository or app bundle.
+Never paste the key into a prompt, screenshot, or chat. Prompts are sent to the OpenAI API over HTTPS. The key stays in Keychain and is not stored in the repository or app bundle.
 
 ## Generate
 
-Write a prompt in the box and press **Generate**. Cooled AI keeps a short recent conversation context and supports writing, ideas, explanations, planning, and code.
+Write a prompt and press **Generate**. KAEL keeps recent conversation context and responds in a concise, practical builder voice.
 
 ## Research
 
-Switch **Research** on to require the Responses API web-search tool for that turn. The response shows clickable source links from URL-citation annotations and the returned web-search sources.
+Switch **Research** on to require the Responses API web-search tool for that turn. KAEL returns clickable source links from URL-citation annotations and web-search source results.
 
-OpenAI's current documentation recommends the Responses API `web_search` tool for new integrations. See the [web-search guide](https://developers.openai.com/api/docs/guides/tools-web-search) and [Responses API documentation](https://developers.openai.com/api/docs/guides/responses).
+See the [OpenAI web-search guide](https://developers.openai.com/api/docs/guides/tools-web-search) and [Responses API documentation](https://developers.openai.com/api/docs/guides/responses).
 
-## Costs and account setup
+## Important limits and costs
 
-This app is not a free AI service and does not include an API key. API usage is billed separately from a ChatGPT subscription. Model input/output and web-search calls may cost money. Use an API project managed by a parent or guardian, and set a spending limit before use. Check [current API pricing](https://openai.com/api/pricing/).
+KAEL is a configurable assistant interface, not an unrestricted model. The underlying model and service safeguards remain active. API usage is billed separately from a ChatGPT subscription; model input/output and web-search calls may cost money. Use an API project managed by a parent or guardian and set spending limits before use. Check [API pricing](https://openai.com/api/pricing/).
 
 ## Requirements
 
@@ -52,6 +52,6 @@ swift run
 
 ## Manual download
 
-Open the [latest GitHub Release](https://github.com/ttmeticks-source/Cracked-Client/releases/latest) and download `CooledAI-macOS.zip`.
+Open the [latest GitHub Release](https://github.com/ttmeticks-source/Cracked-Client/releases/latest) and download `KAEL-macOS.zip`.
 
 The app is not code-signed or notarized. macOS may show a first-launch security warning.
