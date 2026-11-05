@@ -22,7 +22,8 @@ struct ClientView: View {
     @State private var selectedTab = "Home"
     @State private var hasChosenEdition = false
     @State private var launchAlert = false
-    @State private var launchMessage = ""\n    @State private var androidEmulatorProcess: Process? = nil
+    @State private var launchMessage = ""
+    @State private var androidEmulatorProcess: Process? = nil
 
     private let tabs = ["Home", "HUD", "Practice", "Settings"]
 
