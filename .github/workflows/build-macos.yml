@@ -30,7 +30,7 @@ jobs:
             .build-arm64/arm64-apple-macosx/release/CrackedClient \
             -output "$APP/Contents/MacOS/CrackedClient"
           chmod +x "$APP/Contents/MacOS/CrackedClient"
-          lipo -verify_arch x86_64 arm64 "$APP/Contents/MacOS/CrackedClient"
+          lipo "$APP/Contents/MacOS/CrackedClient" -verify_arch x86_64 arm64
           file "$APP/Contents/MacOS/CrackedClient"
           cat > "$APP/Contents/Info.plist" <<'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
