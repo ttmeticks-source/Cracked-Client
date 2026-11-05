@@ -22,7 +22,7 @@ struct ClientView: View {
     @State private var selectedTab = "Home"
     @State private var hasChosenEdition = false
     @State private var launchAlert = false
-    @State private var launchMessage = ""
+    @State private var launchMessage = ""\n    @State private var androidEmulatorProcess: Process? = nil
 
     private let tabs = ["Home", "HUD", "Practice", "Settings"]
 
@@ -143,7 +143,7 @@ struct ClientView: View {
             }
         }
         .preferredColorScheme(.dark)
-        .alert("Minecraft Launcher", isPresented: $launchAlert) {
+        .alert("Game Launch", isPresented: $launchAlert) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(launchMessage)
@@ -159,12 +159,12 @@ struct ClientView: View {
             Text("CHOOSE YOUR EDITION")
                 .font(.system(size: 25, weight: .bold))
                 .foregroundStyle(.white)
-            Text("Select which Minecraft version to use.")
+            Text("Choose a free official trial. Bedrock runs through an Android emulator.")
                 .foregroundStyle(.gray)
 
             HStack(spacing: 18) {
-                editionCard(title: "Java Edition", subtitle: "PC • Java", symbol: "laptopcomputer")
-                editionCard(title: "Bedrock Edition", subtitle: "Cross-platform", symbol: "cube.transparent")
+                editionCard(title: "Java Edition", subtitle: "Free official demo • Mac", symbol: "laptopcomputer")
+                editionCard(title: "Bedrock Edition", subtitle: "Free Android trial • Emulator", symbol: "cube.transparent")
             }
             .frame(maxWidth: 620)
 
@@ -206,12 +206,14 @@ struct ClientView: View {
     }
 
     private func launchSelectedEdition() {
-        guard edition == "Java Edition" else {
-            launchMessage = "Minecraft Bedrock Edition does not have an official macOS release, so this app cannot launch it on this Mac. Choose Java Edition to launch the native Mac version."
-            launchAlert = true
-            return
+        if edition == "Java Edition" {
+            launchJavaDemo()
+        } else {
+            launchBedrockTrial()
         }
+    }
 
+    private func launchJavaDemo() {
         let fileManager = FileManager.default
         let candidates = [
             URL(fileURLWithPath: "/Applications/Minecraft.app"),
@@ -224,8 +226,11 @@ struct ClientView: View {
             ?? NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.mojang.minecraftlauncher")
 
         guard let appURL = installedApp else {
-            launchMessage = "Minecraft Java Edition was not found. Install the official Minecraft Launcher for macOS, then choose Java Edition again."
+            launchMessage = "The official Minecraft Launcher is not installed. Opening the official download page. Install it in Applications, sign in with a Microsoft account, then choose Play Demo. The Java demo is free and lasts about 100 minutes of in-game time."
             launchAlert = true
+            if let url = URL(string: "https://www.minecraft.net/download") {
+                NSWorkspace.shared.open(url)
+            }
             return
         }
 
@@ -233,10 +238,167 @@ struct ClientView: View {
         NSWorkspace.shared.openApplication(at: appURL, configuration: configuration) { _, error in
             DispatchQueue.main.async {
                 if let error {
-                    launchMessage = "Minecraft could not be opened: \\(error.localizedDescription)"
-                    launchAlert = true
+                    launchMessage = "Minecraft Launcher could not be opened: \\(error.localizedDescription)"
+                } else {
+                    launchMessage = "The official launcher is open. Sign in with a Microsoft account that does not own Java Edition, then choose Play Demo. The free demo is limited to about 100 minutes of in-game time."
                 }
+                launchAlert = true
             }
+        }
+    }
+
+    private func launchBedrockTrial() {
+        guard let sdkRoot = androidSDKRoot() else {
+            launchMessage = "Bedrock has no native macOS release. Its official free trial is the Android app. To run it here, install Android Studio, add the Android Emulator, and create a virtual phone with a Google Play image. This app will detect and start that emulator. Android Studio's download page is opening."
+            launchAlert = true
+            openAndroidStudioSetup()
+            return
+        }
+
+        let emulatorURL = sdkRoot.appendingPathComponent("emulator/emulator")
+        let adbURL = sdkRoot.appendingPathComponent("platform-tools/adb")
+        let fileManager = FileManager.default
+
+        guard fileManager.isExecutableFile(atPath: emulatorURL.path),
+              fileManager.isExecutableFile(atPath: adbURL.path) else {
+            launchMessage = "The Android SDK was found, but its Emulator or ADB tool is missing. Open Android Studio → SDK Manager and install Android Emulator and Android SDK Platform-Tools."
+            launchAlert = true
+            openAndroidStudioSetup()
+            return
+        }
+
+        guard let avdOutput = commandOutput(emulatorURL, arguments: ["-list-avds"]) else {
+            launchMessage = "Android Emulator could not list its virtual devices. Open Android Studio and check Device Manager."
+            launchAlert = true
+            openAndroidStudioSetup()
+            return
+        }
+
+        let avds = avdOutput
+            .components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        guard let playStoreAVD = avds.first(where: { avdHasGooglePlay($0) }) else {
+            launchMessage = "No Google Play-enabled Android virtual device was found. In Android Studio → Device Manager, create a phone and choose a system image labelled Google Play. Then press Bedrock Trial again."
+            launchAlert = true
+            openAndroidStudioSetup()
+            return
+        }
+
+        let emulatorProcess = Process()
+        emulatorProcess.executableURL = emulatorURL
+        emulatorProcess.arguments = ["-avd", playStoreAVD]
+        emulatorProcess.standardOutput = FileHandle.nullDevice
+        emulatorProcess.standardError = FileHandle.nullDevice
+
+        do {
+            try emulatorProcess.run()
+            androidEmulatorProcess = emulatorProcess
+        } catch {
+            launchMessage = "Android Emulator failed to start: \\(error.localizedDescription)"
+            launchAlert = true
+            return
+        }
+
+        DispatchQueue.global(qos: .utility).async {
+            let deadline = Date().addingTimeInterval(240)
+            while Date() < deadline {
+                if commandOutput(adbURL, arguments: ["-e", "shell", "getprop", "sys.boot_completed"]) == "1" {
+                    let playStoreExists = commandOutput(adbURL, arguments: ["-e", "shell", "pm", "path", "com.android.vending"]) != nil
+                    guard playStoreExists else {
+                        DispatchQueue.main.async {
+                            launchMessage = "The Android emulator started, but its Google Play Store is missing. Shut it down and create a virtual device using a Google Play system image."
+                            launchAlert = true
+                        }
+                        return
+                    }
+
+                    _ = commandOutput(adbURL, arguments: [
+                        "-e", "shell", "am", "start",
+                        "-a", "android.intent.action.VIEW",
+                        "-d", "market://details?id=com.mojang.minecrafttrialpe"
+                    ])
+
+                    DispatchQueue.main.async {
+                        launchMessage = "The Android emulator is ready and the official Minecraft Trial listing has been opened in Google Play. Sign in to Google Play, install Minecraft Trial by Mojang, then launch it inside the emulator. This is the free, time-limited Android Bedrock trial—not a native Mac build."
+                        launchAlert = true
+                    }
+                    return
+                }
+                Thread.sleep(forTimeInterval: 3)
+            }
+
+            DispatchQueue.main.async {
+                launchMessage = "Android Emulator did not finish starting within four minutes. Open Android Studio → Device Manager, start the Google Play virtual device manually, then try again."
+                launchAlert = true
+            }
+        }
+    }
+
+    private func androidSDKRoot() -> URL? {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        var candidates = [
+            home.appendingPathComponent("Library/Android/sdk"),
+            home.appendingPathComponent("Android/Sdk")
+        ]
+
+        for key in ["ANDROID_SDK_ROOT", "ANDROID_HOME"] {
+            if let value = ProcessInfo.processInfo.environment[key], !value.isEmpty {
+                candidates.insert(URL(fileURLWithPath: value), at: 0)
+            }
+        }
+
+        return candidates.first {
+            FileManager.default.fileExists(atPath: $0.appendingPathComponent("emulator/emulator").path)
+        }
+    }
+
+    private func avdHasGooglePlay(_ name: String) -> Bool {
+        let configURL = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".android/avd/\\(name).avd/config.ini")
+        guard let config = try? String(contentsOf: configURL, encoding: .utf8) else {
+            return false
+        }
+        let normalized = config
+            .replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: "\\t", with: "")
+            .lowercased()
+        return normalized.contains("playstore.enabled=true")
+    }
+
+    private func openAndroidStudioSetup() {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        let studioCandidates = [
+            URL(fileURLWithPath: "/Applications/Android Studio.app"),
+            home.appendingPathComponent("Applications/Android Studio.app")
+        ]
+        if let studio = studioCandidates.first(where: {
+            FileManager.default.fileExists(atPath: $0.path)
+        }) {
+            NSWorkspace.shared.openApplication(at: studio, configuration: NSWorkspace.OpenConfiguration()) { _, _ in }
+        } else if let url = URL(string: "https://developer.android.com/studio") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
+    private func commandOutput(_ executable: URL, arguments: [String]) -> String? {
+        let process = Process()
+        let output = Pipe()
+        process.executableURL = executable
+        process.arguments = arguments
+        process.standardOutput = output
+        process.standardError = FileHandle.nullDevice
+
+        do {
+            try process.run()
+            let data = output.fileHandleForReading.readDataToEndOfFile()
+            process.waitUntilExit()
+            guard process.terminationStatus == 0 else { return nil }
+            return String(data: data, encoding: .utf8)?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        } catch {
+            return nil
         }
     }
 
