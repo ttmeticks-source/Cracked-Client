@@ -1,4 +1,4 @@
-name: Build Cracked Client for macOS
+name: Build Cooled AI for macOS
 
 on:
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          APP="CrackedClient.app"
+          APP="CooledAI.app"
           mkdir -p "$APP/Contents/MacOS"
           lipo -create \
             .build-x86_64/x86_64-apple-macosx/release/CrackedClient \
@@ -36,11 +36,11 @@ jobs:
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0"><dict>
-          <key>CFBundleName</key><string>CrackedClient</string>
-          <key>CFBundleDisplayName</key><string>Cracked Client</string>
-          <key>CFBundleIdentifier</key><string>com.c0oled.crackedclient</string>
-          <key>CFBundleVersion</key><string>1.2</string>
-          <key>CFBundleShortVersionString</key><string>1.2</string>
+          <key>CFBundleName</key><string>CooledAI</string>
+          <key>CFBundleDisplayName</key><string>Cooled AI</string>
+          <key>CFBundleIdentifier</key><string>com.c0oled.cooledai</string>
+          <key>CFBundleVersion</key><string>2.0</string>
+          <key>CFBundleShortVersionString</key><string>2.0</string>
           <key>CFBundlePackageType</key><string>APPL</string>
           <key>CFBundleExecutable</key><string>CrackedClient</string>
           <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
@@ -51,11 +51,11 @@ jobs:
           </dict></plist>
           PLIST
           /usr/libexec/PlistBuddy -c "Print" "$APP/Contents/Info.plist" >/dev/null
-          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP" CrackedClient-macOS.zip
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP" CooledAI-macOS.zip
 
       - uses: actions/upload-artifact@v4
         with:
-          name: CrackedClient-macOS
+          name: CooledAI-macOS
           path: CrackedClient-macOS.zip
 
       - name: Publish latest build and tagged releases
