@@ -1,47 +1,34 @@
-# Cracked Client
+# Cracked Client — macOS companion app
 
-A small macOS Minecraft companion UI with a Java Edition / Bedrock Edition selector, configurable HUD preview toggles, and practice notes.
+A native SwiftUI companion interface with Java/Bedrock profiles, saved HUD preferences, and local practice notes.
 
 **Made by c0oled!**
 
-## What it currently does
+## Current features
+- macOS desktop GUI with Home, HUD, Practice, and Settings tabs
+- Java Edition / Bedrock Edition profile selector
+- Preferences saved locally using AppStorage
+- Practice notes saved locally
+- GitHub Actions workflow that builds a downloadable `.app` ZIP
 
-- Native SwiftUI macOS app
-- Switches between Java Edition and Bedrock Edition views
-- HUD preview toggles for coordinates, FPS placeholder, and clock placeholder
-- Local practice notes
-
-The current version is a companion interface and preview. It does not inject into Minecraft, modify game memory, bypass account or server rules, or provide multiplayer exploits. The displayed HUD values are placeholders, not live game telemetry.
-
-Java and Bedrock have different extension ecosystems; selecting an edition in this app does not install or activate mods for either game.
+This is a companion utility, not an injector, exploit, or multiplayer cheat. It does not read or modify Minecraft processes, bypass account checks, or change game files. The HUD options are app-side preferences, not live in-game telemetry. Java and Bedrock have separate extension ecosystems.
 
 ## Requirements
+- macOS 13 or later to run the app
+- Swift 5.9+ to build locally
 
-- macOS 13 or later
-- Xcode Command Line Tools / Swift 5.9 or later
-
-## Build
-
+## Build locally
 ```sh
 swift build -c release
-```
-
-Run from the project directory:
-
-```sh
 swift run
 ```
 
-## Install a packaged release
+## Download the macOS app
+1. Open the repository's **Actions** tab.
+2. Select **Build Cracked Client for macOS** and click **Run workflow**.
+3. When it completes, download `CrackedClient-macOS.zip` from the run's Artifacts.
+4. Unzip it and move `CrackedClient.app` into Applications.
 
-After a GitHub Release has been published, run:
+Pushing a version tag such as `v1.0.0` also attaches the ZIP to a GitHub Release.
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/ttmeticks-source/Cracked-Client/main/install.sh | bash
-```
-
-Review the installer before running it if you prefer to inspect scripts first.
-
-## License
-
-MIT
+The app is not code-signed or notarized. macOS may show a first-launch security warning.
